@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Practise_Tasks.Interfaces;
 using System.Text;
 
 namespace Practise_Tasks.Controllers
@@ -7,11 +8,18 @@ namespace Practise_Tasks.Controllers
     [Route("/reverser")]
     public class ReverseController
     {
+        private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
+            "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
+        private IInputValidate _validator;
+
+        public ReverseController(IInputValidate validator) =>
+            _validator = validator;
+
         [HttpGet]
         public string GetNewString(string? input)
         {
-            if (input == null)
-                return String.Empty;
+            if (!_validator.IsValid(input))
+                return INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'";
 
             if (input.Length % 2 == 0)
             {
