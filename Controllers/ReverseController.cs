@@ -11,8 +11,8 @@ namespace Practise_Tasks.Controllers
     {
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
-        private IInputValidate _validator;
-        private IItemsRepeatsCounter<char, string> _counter;
+        private readonly IInputValidate _validator;
+        private readonly IItemsRepeatsCounter<char, string> _counter;
 
         public ReverseController(IInputValidate validator, 
             IItemsRepeatsCounter<char, string> counter) 
@@ -24,25 +24,20 @@ namespace Practise_Tasks.Controllers
         [HttpGet]
         public string GetNewString(string? input)
         {
-            if (!_validator.IsValid(input))
+            if (!_validator.IsValid(input) || input == null)
                 return INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'";
 
             if (input.Length % 2 == 0)
             {
                 (string half1, string half2) = DivideInHalf(input);
 
-                (half1, half2) = (Reverse(half1), Reverse(half2));
-
-                var processedStringBuilder = new StringBuilder(half1 + half2);
-                var processedString = processedStringBuilder.ToString();
+                string processedString = Reverse(half1) + Reverse(half2);
 
                 return processedString + GetCharsAmount(processedString);
             }
             else
             {
-                var processedStringBuilder = new StringBuilder(Reverse(input));
-                processedStringBuilder.Append(input);
-                var processedString = processedStringBuilder.ToString();
+                var processedString = Reverse(input) + input;
 
                 return processedString + GetCharsAmount(processedString);
             }
