@@ -11,6 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IInputValidate, ReverseInputValidate>();
+builder.Services.AddScoped<IItemsRepeatsCounter<char, string>, CharsRepeatsCounter>();
 
 var app = builder.Build();
 

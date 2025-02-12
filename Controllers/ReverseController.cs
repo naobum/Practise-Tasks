@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Practise_Tasks.ExtensionMethods;
 using Practise_Tasks.Interfaces;
 using System.Text;
 
@@ -10,33 +11,49 @@ namespace Practise_Tasks.Controllers
     {
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
-        private IInputValidate _validator;
+        private readonly IInputValidate _validator;
+        private readonly IItemsRepeatsCounter<char, string> _counter;
 
-        public ReverseController(IInputValidate validator) =>
+        public ReverseController(IInputValidate validator, 
+            IItemsRepeatsCounter<char, string> counter) 
+        {
             _validator = validator;
+            _counter = counter;
+        }
 
         [HttpGet]
         public string GetNewString(string? input)
         {
-            if (!_validator.IsValid(input))
+            if (!_validator.IsValid(input) || input == null)
                 return INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'";
 
             if (input.Length % 2 == 0)
             {
                 (string half1, string half2) = DivideInHalf(input);
 
-                (half1, half2) = (Reverse(half1), Reverse(half2));
+                string processedString = Reverse(half1) + Reverse(half2);
 
-                var result = new StringBuilder(half1 + half2);
-                
-                return result.ToString();
+                return processedString + GetCharsAmount(processedString);
             }
             else
             {
-                var result = new StringBuilder(Reverse(input));
-                result.Append(input);
-                return result.ToString();
+                var processedString = Reverse(input) + input;
+
+                return processedString + GetCharsAmount(processedString);
             }
+        }
+
+        private string GetCharsAmount(string msg)
+        {
+            var amountInfoBuilder = new StringBuilder();
+            Dictionary<char, int> amounts = _counter.CountRepeats(msg);
+
+            foreach (char item in msg.ToUniqueCharsArray())
+            {
+                amountInfoBuilder.Append($"\n{item}: {amounts[item]}");
+            }
+            
+            return amountInfoBuilder.ToString();
         }
 
         private string Reverse(string input)
