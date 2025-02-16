@@ -8,7 +8,7 @@ namespace Practise_Tasks.Services
         private const string VOWELS = "aeiouy";
         public string FindSubset(string fullSrting)
         {
-            var maxSubstring = String.Empty;
+            var maxSubstring = new StringBuilder();
 
             int startPos = 0;
             int endPos = fullSrting.Length - 1;
@@ -28,7 +28,6 @@ namespace Practise_Tasks.Services
             for (int i = startPos; i <= endPos; i++)
                 maxSubstring.Append(fullSrting[i]);
             
-
             return maxSubstring.ToString();
         }
     }
