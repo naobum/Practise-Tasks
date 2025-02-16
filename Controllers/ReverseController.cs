@@ -12,13 +12,15 @@ namespace Practise_Tasks.Controllers
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
         private readonly IInputValidate _validator;
-        private readonly IItemsRepeatsCounter<char, string> _counter;
+        private readonly IItemsCounter<char, string> _counter;
+        private readonly ISubsetFinder<string> _finder;
 
         public ReverseController(IInputValidate validator, 
-            IItemsRepeatsCounter<char, string> counter) 
+            IItemsCounter<char, string> counter, ISubsetFinder<string> finder) 
         {
             _validator = validator;
             _counter = counter;
+            _finder = finder;
         }
 
         [HttpGet]
@@ -33,20 +35,24 @@ namespace Practise_Tasks.Controllers
 
                 string processedString = Reverse(half1) + Reverse(half2);
 
-                return processedString + GetCharsAmount(processedString);
+                return processedString + GetCharsAmount(processedString) + GetMaxVowelSpan(processedString);
             }
             else
             {
                 var processedString = Reverse(input) + input;
 
-                return processedString + GetCharsAmount(processedString);
+                return processedString + GetCharsAmount(processedString) + GetMaxVowelSpan(processedString);
             }
+        }
+        private string GetMaxVowelSpan(string msg)
+        {
+            return $"\n{_finder.FindSubset(msg)}";
         }
 
         private string GetCharsAmount(string msg)
         {
             var amountInfoBuilder = new StringBuilder();
-            Dictionary<char, int> amounts = _counter.CountRepeats(msg);
+            Dictionary<char, int> amounts = _counter.CountItems(msg);
 
             foreach (char item in msg.ToUniqueCharsArray())
             {

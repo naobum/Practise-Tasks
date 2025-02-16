@@ -2,9 +2,9 @@
 
 namespace Practise_Tasks.Services
 {
-    public class CharsRepeatsCounter : IItemsRepeatsCounter<char, string>
+    public class CharsCounter : IItemsCounter<char, string>
     {
-        public Dictionary<char, int> CountRepeats(string collection)
+        public Dictionary<char, int> CountItems(string collection)
         {
             var result = new Dictionary<char, int>();
 
@@ -13,7 +13,7 @@ namespace Practise_Tasks.Services
                 if (result.ContainsKey(c))
                     result[c]++;
                 else 
-                    result[c] = 0; // not 1, because we count repetitions, not amount 
+                    result[c] = 1; 
             }
 
             return result;
