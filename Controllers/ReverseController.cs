@@ -35,6 +35,7 @@ namespace Practise_Tasks.Controllers
             if (!_validator.IsValid(input) || input == null)
                 return BadRequest(INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'");
 
+
             switch (sortAlgorithm.ToLower())
             {
                 case "quicksort":
