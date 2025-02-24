@@ -9,10 +9,11 @@ namespace Practise_Tasks.Controllers
 {
     [ApiController]
     [Route("/reverser")]
-    public class ReverseController
+    public class ReverseController : ControllerBase
     {
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
+        private const string INVALID_SORTING_METHOD_MESSAGE = "Некорректное название алгоритма. Используйте 'quicksort' или 'treesort'.";
         private readonly IInputValidate _validator;
         private readonly IItemsCounter<char, string> _counter;
         private readonly ISubsetFinder<string> _finder;
@@ -29,10 +30,10 @@ namespace Practise_Tasks.Controllers
         }
 
         [HttpGet]
-        public async Task<string> GetNewString(string? input, string sortAlgorithm = "quicksort")
+        public async Task<ActionResult<string[]>> GetNewString(string? input, string sortAlgorithm = "quicksort")
         {
             if (!_validator.IsValid(input) || input == null)
-                return INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'";
+                return BadRequest(INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'");
 
             switch (sortAlgorithm.ToLower())
             {
@@ -43,7 +44,7 @@ namespace Practise_Tasks.Controllers
                     _sorter = new TreeSort();
                     break;
                 default:
-                    return "Некорректное название алгоритма. Используйте 'quicksort' или 'treesort'.";
+                    return BadRequest(INVALID_SORTING_METHOD_MESSAGE);
             }
 
             string processedString;
@@ -63,13 +64,14 @@ namespace Practise_Tasks.Controllers
             string sortedString = processedString;
             _sorter.Sort(ref sortedString);
 
-            return processedString + GetCharsAmount(processedString) +
-                GetMaxVowelSpan(processedString) + $"\n{sortedString}" + $"\n{cutString}";
+            var result = new string[] {processedString, GetCharsAmount(processedString),
+                GetMaxVowelSpan(processedString), sortedString, cutString.ToString() };
+            return Ok(result);
         }
 
         private string GetMaxVowelSpan(string msg)
         {
-            return $"\n{_finder.FindSubset(msg)}";
+            return _finder.FindSubset(msg);
         }
 
         private string GetCharsAmount(string msg)
@@ -79,9 +81,9 @@ namespace Practise_Tasks.Controllers
 
             foreach (char item in msg.ToUniqueCharsArray())
             {
-                amountInfoBuilder.Append($"\n{item}: {amounts[item]}");
+                amountInfoBuilder.Append($" {item}:{amounts[item]}");
             }
-            
+            amountInfoBuilder.Remove(0, 1);
             return amountInfoBuilder.ToString();
         }
 
