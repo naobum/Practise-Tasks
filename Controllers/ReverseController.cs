@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Practise_Tasks.ExtensionMethods;
 using Practise_Tasks.Interfaces;
 using Practise_Tasks.Services;
 using Practise_Tasks.Services.Sortings;
+using Practise_Tasks.Settings;
 using System.Text;
 
 namespace Practise_Tasks.Controllers
@@ -14,19 +16,23 @@ namespace Practise_Tasks.Controllers
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
         private const string INVALID_SORTING_METHOD_MESSAGE = "Некорректное название алгоритма. Используйте 'quicksort' или 'treesort'.";
+        private const string BLACK_LIST_WARNING = "Данная строка находится в чёрном списке, попробуйте использовать другую.";
         private readonly IInputValidate _validator;
         private readonly IItemsCounter<char, string> _counter;
         private readonly ISubsetFinder<string> _finder;
         private readonly IRandomNumber _randomNumber;
+        private readonly ReverseControllerSettings _settings;
         private ISorter<string, char> _sorter = new QuickSort();
 
         public ReverseController(IInputValidate validator, 
-            IItemsCounter<char, string> counter, ISubsetFinder<string> finder, IRandomNumber randomNumber) 
+            IItemsCounter<char, string> counter, ISubsetFinder<string> finder, IRandomNumber randomNumber,
+            IOptions<ReverseControllerSettings> settings) 
         {
             _validator = validator;
             _counter = counter;
             _finder = finder;
             _randomNumber = randomNumber;
+            _settings = settings.Value;
         }
 
         [HttpGet]
@@ -35,6 +41,8 @@ namespace Practise_Tasks.Controllers
             if (!_validator.IsValid(input) || input == null)
                 return BadRequest(INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'");
 
+            if (_settings.BlackList.Contains(input))
+                return BadRequest(BLACK_LIST_WARNING);
 
             switch (sortAlgorithm.ToLower())
             {
