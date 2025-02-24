@@ -13,6 +13,7 @@ namespace Practise_Tasks.Controllers
     {
         private const string INVALID_CHARS_ERROR_MESSAGE = "Были введены неподходящие символы. " +
             "Необходимо использовать только латинские буквы в нижнем регистре. Вы использовали: ";
+        private const string INVALID_SORTING_METHOD_MESSAGE = "Некорректное название алгоритма. Используйте 'quicksort' или 'treesort'.";
         private readonly IInputValidate _validator;
         private readonly IItemsCounter<char, string> _counter;
         private readonly ISubsetFinder<string> _finder;
@@ -32,9 +33,8 @@ namespace Practise_Tasks.Controllers
         public async Task<ActionResult<string[]>> GetNewString(string? input, string sortAlgorithm = "quicksort")
         {
             if (!_validator.IsValid(input) || input == null)
-            {
                 return BadRequest(INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'");
-            }
+
 
             switch (sortAlgorithm.ToLower())
             {
@@ -45,7 +45,7 @@ namespace Practise_Tasks.Controllers
                     _sorter = new TreeSort();
                     break;
                 default:
-                    return BadRequest("Некорректное название алгоритма. Используйте 'quicksort' или 'treesort'.");
+                    return BadRequest(INVALID_SORTING_METHOD_MESSAGE);
             }
 
             string processedString;
@@ -65,8 +65,9 @@ namespace Practise_Tasks.Controllers
             string sortedString = processedString;
             _sorter.Sort(ref sortedString);
 
-            return new string[] {processedString, GetCharsAmount(processedString),
+            var result = new string[] {processedString, GetCharsAmount(processedString),
                 GetMaxVowelSpan(processedString), sortedString, cutString.ToString() };
+            return Ok(result);
         }
 
         private string GetMaxVowelSpan(string msg)
