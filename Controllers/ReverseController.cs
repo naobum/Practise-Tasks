@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Practise_Tasks.ExtensionMethods;
 using Practise_Tasks.Interfaces;
+using Practise_Tasks.Services;
 using Practise_Tasks.Services.Sortings;
 using System.Text;
 
@@ -15,18 +16,20 @@ namespace Practise_Tasks.Controllers
         private readonly IInputValidate _validator;
         private readonly IItemsCounter<char, string> _counter;
         private readonly ISubsetFinder<string> _finder;
+        private readonly IRandomNumber _randomNumber;
         private ISorter<string, char> _sorter = new QuickSort();
 
         public ReverseController(IInputValidate validator, 
-            IItemsCounter<char, string> counter, ISubsetFinder<string> finder) 
+            IItemsCounter<char, string> counter, ISubsetFinder<string> finder, IRandomNumber randomNumber) 
         {
             _validator = validator;
             _counter = counter;
             _finder = finder;
+            _randomNumber = randomNumber;
         }
 
         [HttpGet]
-        public string GetNewString(string? input, string sortAlgorithm = "quicksort")
+        public async Task<string> GetNewString(string? input, string sortAlgorithm = "quicksort")
         {
             if (!_validator.IsValid(input) || input == null)
                 return INVALID_CHARS_ERROR_MESSAGE + $"\'{_validator.GetInvalidChars(input)}\'";
@@ -51,13 +54,17 @@ namespace Practise_Tasks.Controllers
                  processedString = Reverse(half1) + Reverse(half2);
             }
             else
-                processedString = Reverse(input) + input;   
+                processedString = Reverse(input) + input;
+
+            var cutString = new StringBuilder(processedString);
+            var randNum = await _randomNumber.GetIntAsync(0, processedString.Length);
+            cutString.Remove(randNum, 1);
 
             string sortedString = processedString;
             _sorter.Sort(ref sortedString);
 
-            return processedString + GetCharsAmount(processedString) + 
-                GetMaxVowelSpan(processedString) + $"\n{sortedString}";
+            return processedString + GetCharsAmount(processedString) +
+                GetMaxVowelSpan(processedString) + $"\n{sortedString}" + $"\n{cutString}";
         }
 
         private string GetMaxVowelSpan(string msg)
