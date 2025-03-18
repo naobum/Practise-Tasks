@@ -19,6 +19,7 @@ builder.Services.AddScoped<IInputValidate, ReverseInputValidate>();
 builder.Services.AddScoped<IItemsCounter<char, string>, CharsCounter>();
 builder.Services.AddScoped<ISubsetFinder<string>, VowelSpan>();
 builder.Services.AddScoped<IRandomNumber, RandomNumber>();
+builder.Services.AddScoped<IStringHandler, StringHandler>();
 builder.Services.AddHttpClient("GetRandomNumber", client =>
 {
     client.BaseAddress = new Uri("https://www.randomnumberapi.com/api/v1.0/random");

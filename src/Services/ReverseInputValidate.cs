@@ -23,7 +23,7 @@ namespace Practise_Tasks.Services
 
         public bool IsValid(string? input)
         {
-            if (input == null)
+            if (String.IsNullOrEmpty(input))
                 return false;
             
             var result = true;
